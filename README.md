@@ -1,16 +1,8 @@
-# anime_rank
+# Anime Rank
 
-A new Flutter project.
+It's a Flutter project containing a Android and Web app displaying the top five animes of the seasons.
 
-## Getting Started
+The app uses the APIs from MyAnimeList and Spotify.
 
-This project is a starting point for a Flutter application.
+## Demostration
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
