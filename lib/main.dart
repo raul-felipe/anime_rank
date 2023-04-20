@@ -1,8 +1,11 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'api_function.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:spotify_sdk/spotify_sdk.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,14 +38,13 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final player = AudioPlayer();
   String token = '';
-
   List getSeasonalAnime(List seasonAnime) {
     seasonAnime.sort(
       (a, b) {
         a['node']['mean'] ??= 0;
         b['node']['mean'] ??= 0;
-        return (b['node']['mean'] as double)
-            .compareTo(a['node']['mean'] as double);
+        return (b['node']['mean'].toDouble())
+            .compareTo(a['node']['mean'].toDouble());
       },
     );
 
@@ -97,7 +99,6 @@ class _MyHomePageState extends State<MyHomePage> {
     List seasonAnime =
         await APIFunctions.getSeasonalAnimeLits(year, season) as List;
     List seasonalTVAnime = getSeasonalAnime(seasonAnime);
-    // print(seasonalTVAnime);
     List topFiveAnime = await getTopFiveAnime(seasonalTVAnime);
     return topFiveAnime;
   }
@@ -150,7 +151,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Column(
                         children: [
                           const Icon(Icons.star),
-                          Text(topFive[index]['score'].toString())
+                          Text(topFive[index]['score'].toString(),style: const TextStyle(
+                              fontSize: 10))
                         ],
                       ))
                 ],
@@ -261,42 +263,110 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (context) {
         return Dialog(
           child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Container(
-              width: 200,
-              child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'About the app',
-                  style: TextStyle(fontSize: 22),
+              padding: const EdgeInsets.all(16),
+              child: Container(
+                width: 200,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'About the app',
+                      style: TextStyle(fontSize: 22),
+                    ),
+                    const Divider(
+                      height: 20,
+                    ),
+                    const Text(
+                      'This app uses automatic functions from APIs. Some information or songs may not be correct',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    const Divider(
+                      height: 16,
+                    ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Text.rich(
+                          textAlign: TextAlign.left,
+                          TextSpan(
+                              text: 'Developer: Raul Felipe Almeida',
+                              children: [
+                                TextSpan(
+                                    text: ' - GitHub',
+                                    style: const TextStyle(
+                                        color: Colors.blueAccent),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        launchUrl(Uri.parse(
+                                            'https://github.com/raul-felipe/anime_rank'));
+                                      })
+                              ])),
+                    ),
+                    Container(
+                      height: 14,
+                    ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Text.rich(
+                          textAlign: TextAlign.left,
+                          TextSpan(
+                              text: 'Anime info: Myanimelist API',
+                              children: [
+                                TextSpan(
+                                    text: ' - MAL Website',
+                                    style: const TextStyle(
+                                        color: Colors.blueAccent),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        launchUrl(Uri.parse(
+                                            'https://myanimelist.net/'));
+                                      })
+                              ])),
+                    ),
+                    Container(
+                      height: 14,
+                    ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Text.rich(
+                          textAlign: TextAlign.left,
+                          TextSpan(
+                              text: 'Songs: Spotify API',
+                              children: [
+                                TextSpan(
+                                    text: ' - Spotify Website',
+                                    style: const TextStyle(
+                                        color: Colors.blueAccent),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        launchUrl(Uri.parse(
+                                            'https://open.spotify.com/'));
+                                      })
+                              ])),
+                    ),
+                    Container(
+                      height: 14,
+                    ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Text.rich(
+                          textAlign: TextAlign.left,
+                          TextSpan(
+                              text: 'Season backgroud images: Designed by pikisuperstar / Freepik',
+                              children: [
+                                TextSpan(
+                                    text: ' - Source',
+                                    style: const TextStyle(
+                                        color: Colors.blueAccent),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        launchUrl(Uri.parse(
+                                            'https://www.freepik.com/author/pikisuperstar'));
+                                      })
+                              ])),
+                    ),
+                  ],
                 ),
-                const Divider(height: 20,),
-                const Text(
-                  'This app use automatic functions using APIs. Some information or songs may not be correct',
-                  style: TextStyle(fontSize: 16),
-                ),
-                const Divider(height: 16,),
-                const SizedBox(
-                    width: double.infinity,
-                    child: Text('Developer: Raul Felipe Almeida',
-                        textAlign: TextAlign.left)),
-                        Container(height: 14,),
-                const SizedBox(
-                    width: double.infinity,
-                    child: Text('Anime info: Myanimelist API')),
-                    Container(height: 14,),
-                const SizedBox(
-                    width: double.infinity, child: Text('Songs: Spotify API')),
-                    Container(height: 14,),
-                const SizedBox(
-                    width: double.infinity,
-                    child: Text(
-                        'Season backgroud images: Designed by pikisuperstar / Freepik'))
-              ],
-            ),
-            )
-          ),
+              )),
         );
       },
     );
