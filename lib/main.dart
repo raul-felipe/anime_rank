@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'api_function.dart';
@@ -5,6 +6,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 
 void main() {
   runApp(const MyApp());
@@ -71,13 +73,22 @@ class _MyHomePageState extends State<MyHomePage> {
       Map ad =
           await APIFunctions.getAnimeDetail(seasonalTVAnime[i]['id'].toString())
               as Map;
+
+      String op = ad['opening_themes'][0]['text'];
+      String ed = ad['ending_themes'][0]['text'];
+      if (op.contains(ed.substring(6, 12)) &&
+          ad['ending_themes'][1]['text'] != null) {
+        ed = ad['ending_themes'][1]['text'];
+      }
+
       topFiveAnime.add({
         'id': ad['id'],
         'title': ad['title'],
         'ja_title': ad['alternative_titles']['ja'],
         'picture': ad['main_picture'],
         'score': ad['mean'],
-        'song': ad['opening_themes'][0]['text'],
+        'op': op,
+        'ed': ed,
       });
     }
     return topFiveAnime;
@@ -104,59 +115,132 @@ class _MyHomePageState extends State<MyHomePage> {
 
   int _index = 0;
   List season = ['winter', 'fall', 'summer', 'spring'];
+  List<double> cardColorStops = [0, 0.01, 0.99, 1];
+
+  void playSong(String songName) async {
+    Map track = await APIFunctions.getTrackPreview(songName, token) as Map;
+    await player.setSourceUrl(track['tracks']['items'][0]['preview_url']);
+    await player.resume();
+  }
 
   Widget cardAnimeListItem(int index, List topFive) {
-    return Card(
-        child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: InkWell(
-              onTap: () async {
-                Map track = await APIFunctions.getTrackPreview(
-                    topFive[index]['song'], token) as Map;
-                await player
-                    .setSourceUrl(track['tracks']['items'][0]['preview_url']);
-                await player.resume();
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    flex: 3,
-                    child: Image.network(topFive[index]['picture']['large']),
-                  ),
-                  const SizedBox(height: 30, child: VerticalDivider()),
-                  Flexible(
-                    flex: 8,
-                    child: Column(
-                      children: [
-                        Text(
-                          topFive[index]['title'],
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+    int _currentSliderValue = 1;
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Card(
+            child: AnimatedContainer(
+                duration: const Duration(seconds: 1),
+                curve: Curves.fastOutSlowIn,
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Colors.red[100]!,
+                    Colors.white,
+                    Colors.white,
+                    Colors.blue[100]!
+                  ],
+                  stops: cardColorStops,
+                )),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                          flex: 3,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16.0),
+                            child: Image.network(
+                                topFive[index]['picture']['large']),
+                          )),
+                      const SizedBox(height: 30, child: VerticalDivider()),
+                      Flexible(
+                        flex: 8,
+                        child: Column(
+                          children: [
+                            Text(
+                              topFive[index]['title'],
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            const Divider(),
+                            Text(
+                              topFive[index]['ja_title'],
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const Divider(),
+                            //Text(topFive[index]['song'])
+                            AnimatedToggleSwitch<int>.rolling(
+                              current: _currentSliderValue,
+                              innerGradient: LinearGradient(colors: [
+                                Colors.red[100]!,
+                                Colors.blue[100]!
+                              ]),
+                              borderColor: Colors.transparent,
+                              indicatorColor: Colors.white,
+                              values: const [0, 1, 2],
+                              onChanged: (i) => setState(() {
+                                _currentSliderValue = i;
+                                switch (i) {
+                                  case 0:
+                                    cardColorStops = [0, 0.5, 0.95, 1];
+                                    playSong(topFive[index]['op']);
+                                    break;
+                                  case 2:
+                                    cardColorStops = [0, 0.05, 0.5, 1];
+                                    playSong(topFive[index]['ed']);
+                                    break;
+                                  default:
+                                    cardColorStops = [0, 0.01, 0.99, 1];
+                                    player.pause();
+                                    break;
+                                }
+                              }),
+                              iconBuilder: (value, size, foreground) {
+                                switch (value) {
+                                  case 0:
+                                    return const Center(
+                                        child: Text(
+                                      'OP',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ));
+                                  case 1:
+                                    return const Center(
+                                        child: Icon(Icons.pause));
+                                  case 2:
+                                    return const Center(
+                                        child: Text(
+                                      'ED',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ));
+                                  default:
+                                    return const Text('');
+                                }
+                              },
+                            )
+                          ],
                         ),
-                        const Divider(),
-                        Text(
-                          topFive[index]['ja_title'],
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        const Divider(),
-                        Text(topFive[index]['song'])
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 30, child: VerticalDivider()),
+                      Flexible(
+                          flex: 1,
+                          child: Column(
+                            children: [
+                              const Icon(Icons.star),
+                              Text(topFive[index]['score'].toString(),
+                                  style: const TextStyle(fontSize: 10))
+                            ],
+                          ))
+                    ],
                   ),
-                  const SizedBox(height: 30, child: VerticalDivider()),
-                  Flexible(
-                      flex: 1,
-                      child: Column(
-                        children: [
-                          const Icon(Icons.star),
-                          Text(topFive[index]['score'].toString(),style: const TextStyle(
-                              fontSize: 10))
-                        ],
-                      ))
-                ],
-              ),
-            )));
+                )));
+      },
+    );
   }
 
   Widget animatedAnimeListItem(int index, List topFive) {
@@ -328,19 +412,17 @@ class _MyHomePageState extends State<MyHomePage> {
                       width: double.infinity,
                       child: Text.rich(
                           textAlign: TextAlign.left,
-                          TextSpan(
-                              text: 'Songs: Spotify API',
-                              children: [
-                                TextSpan(
-                                    text: ' - Spotify Website',
-                                    style: const TextStyle(
-                                        color: Colors.blueAccent),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        launchUrl(Uri.parse(
-                                            'https://open.spotify.com/'));
-                                      })
-                              ])),
+                          TextSpan(text: 'Songs: Spotify API', children: [
+                            TextSpan(
+                                text: ' - Spotify Website',
+                                style:
+                                    const TextStyle(color: Colors.blueAccent),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    launchUrl(
+                                        Uri.parse('https://open.spotify.com/'));
+                                  })
+                          ])),
                     ),
                     Container(
                       height: 14,
@@ -350,7 +432,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Text.rich(
                           textAlign: TextAlign.left,
                           TextSpan(
-                              text: 'Season backgroud images: Designed by pikisuperstar / Freepik',
+                              text:
+                                  'Season backgroud images: Designed by pikisuperstar / Freepik',
                               children: [
                                 TextSpan(
                                     text: ' - Source',

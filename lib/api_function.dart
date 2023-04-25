@@ -20,7 +20,7 @@ class APIFunctions {
 
   static Future<Object> getTrackPreview(String themeName, String token) async {
     try{
-      var url = Uri.https(SpotifyApiConstants.baseUrl,'${SpotifyApiConstants.trackEndPoint}',{'q':themeName.replaceAll('"', '').replaceAll('(', '').replaceAll(')', '').replaceAll('#1', ''),'type':'track','limit':'20','market':'JP', 'genre':['anime']});
+      var url = Uri.https(SpotifyApiConstants.baseUrl,SpotifyApiConstants.trackEndPoint,{'q':'anime '+themeName.replaceAll('"', '').replaceAll('(', '').replaceAll(')', '').replaceAll('#1', ''),'type':'track','limit':'20','market':'JP', 'genre':['anime']});
       var headers = {'Authorization': 'Bearer $token'};
       var response = await http.get(url,headers: headers);
       var jsonResponse = convert.jsonDecode(response.body) as Map<String, dynamic>;
