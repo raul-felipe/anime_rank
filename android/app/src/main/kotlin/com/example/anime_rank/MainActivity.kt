@@ -1,4 +1,4 @@
-package com.example.anime_rank
+package raulalmeida.top_anime
 
 import io.flutter.embedding.android.FlutterActivity
 

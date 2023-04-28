@@ -7,8 +7,6 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:animated_toggle_switch/animated_toggle_switch.dart';
-
 void main() {
   runApp(const MyApp());
 }
@@ -66,6 +64,9 @@ class _MyHomePageState extends State<MyHomePage> {
           DataRetrieve.season[index % 4]),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
+          
+          if (snapshot.data==null) return const Center(child: Text('There was a error while connecting with the API. Please, try again later.'),);
+
           List? topFive = snapshot.data;
           return AnimationLimiter(
             key: UniqueKey(),
@@ -94,9 +95,9 @@ class _MyHomePageState extends State<MyHomePage> {
     return SizedBox(
       height: 200, // card height
       child: PageView.builder(
-        itemCount: 80,
+        itemCount: 60,
         controller: PageController(viewportFraction: 0.7),
-        onPageChanged: (int index) => setState(() => _index = index),
+        onPageChanged: (int index) => setState((){ _index = index;DataRetrieve.cardColorStops = [0, 0.01, 0.99, 1];}),
         itemBuilder: (_, i) {
           return Transform.scale(
             scale: i == _index ? 1 : 0.9,
@@ -185,7 +186,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     recognizer: TapGestureRecognizer()
                                       ..onTap = () {
                                         launchUrl(Uri.parse(
-                                            'https://github.com/raul-felipe/anime_rank'));
+                                            'https://github.com/raul-felipe/top_anime'));
                                       })
                               ])),
                     ),

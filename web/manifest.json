@@ -1,6 +1,6 @@
 {
-    "name": "anime_rank",
-    "short_name": "anime_rank",
+    "name": "top_anime",
+    "short_name": "top_anime",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -1,5 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'api_function.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class DataRetrieve {
   static final player = AudioPlayer();
@@ -41,7 +42,6 @@ class DataRetrieve {
       Map ad =
           await APIFunctions.getAnimeDetail(seasonalTVAnime[i]['id'].toString())
               as Map;
-
       String op = ad['opening_themes'][0]['text'];
       String ed = ad['ending_themes'][0]['text'];
       if (op.contains(ed.substring(6, 12)) &&
@@ -67,13 +67,23 @@ class DataRetrieve {
         await APIFunctions.getSeasonalAnimeLits(year, season) as List;
     List seasonalTVAnime = getSeasonalAnime(seasonAnime);
     List topFiveAnime = await getTopFiveAnime(seasonalTVAnime);
-    
+
     return topFiveAnime;
   }
 
-  static void playSong(String songName) async {
-    Map track = await APIFunctions.getTrackPreview(songName, token) as Map;
-    await player.setSourceUrl(track['tracks']['items'][0]['preview_url']);
-    await player.resume();
+  static void playSong(String songName, Map animeInfo) async {
+    try {
+      Map track =
+          await APIFunctions.getTrackPreview(songName, token, animeInfo) as Map;
+
+      await player.setSourceUrl(track['tracks']['items'][0]['preview_url']);
+      await player.resume();
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Unavailable song",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+    }
   }
 }
