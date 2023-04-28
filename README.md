@@ -6,4 +6,4 @@ The app uses the APIs from MyAnimeList and Spotify.
 
 ## Demostration
 
-https://user-images.githubusercontent.com/17601661/233301227-c27444b9-cf68-42eb-990c-2fc28b1e5ed0.mp4
+https://user-images.githubusercontent.com/17601661/235067689-bf322e52-8ba2-4b39-8ecd-fbfaced738f1.mp4
